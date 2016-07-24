@@ -11,6 +11,7 @@ namespace CachedIEnumerable
         private IEnumerator<T> enumerator;
         private int currentIndex = -1;
         private bool valid = true;
+        private bool pastEnd = false;
 
         private Action invalidateAll;
 
@@ -21,7 +22,19 @@ namespace CachedIEnumerable
             this.invalidateAll = invalidateAll;
         }
 
-        public T Current { get; set; }
+        private T current;
+        public T Current
+        {
+            get
+            {
+                if (!pastEnd) return current;
+                else throw new InvalidOperationException("The enumerator reached past the end of the collection");
+            }
+            private set
+            {
+                current = value;
+            }
+        }
 
         object IEnumerator.Current
         {
@@ -61,6 +74,7 @@ namespace CachedIEnumerable
                 else
                 {
                     Current = default(T);
+                    pastEnd = true;
                     return false;
                 }
             }

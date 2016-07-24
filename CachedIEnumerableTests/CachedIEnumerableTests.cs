@@ -210,9 +210,10 @@ namespace CachedIEnumerableTests
             var e = list.Cache();
 
             e.Last();
+            var enumerator = e.GetEnumerator();
             list.Add(10);
 
-            Assert.Throws<InvalidOperationException>(() => { e.ElementAt(5); });
+            Assert.Throws<InvalidOperationException>(() => { enumerator.MoveNext(); });
         }
 
         [Fact]
@@ -231,7 +232,7 @@ namespace CachedIEnumerableTests
         }
 
         [Fact]
-        public void InvalidatingSourceEnumeratorInvalidatesAllEnumerators_EvenIfItsNotNecessaryToAdvance()
+        public void InvalidatingSourceEnumeratorInvalidatesEnumerator_EvenIfItsNotNecessaryToAdvance()
         {
             var length = 10;
             var list = Enumerable.Range(0, length).ToList();
@@ -242,8 +243,7 @@ namespace CachedIEnumerableTests
             enumerator1.MoveNext();
             enumerator1.MoveNext();
             list.Add(10);
-
-            Assert.Throws<InvalidOperationException>(() => { enumerator1.MoveNext(); });
+            
             Assert.Throws<InvalidOperationException>(() => { enumerator2.MoveNext(); });
         }
 
@@ -261,6 +261,18 @@ namespace CachedIEnumerableTests
 
             Assert.Throws<InvalidOperationException>(() => { enumerator1.MoveNext(); });
             Assert.Throws<InvalidOperationException>(() => { enumerator2.MoveNext(); });
+        }
+
+        [Fact]
+        public void CurrentShouldThrowInvalidOperationException_IfEnumeratedPastLastValue()
+        {
+            var length = 10;
+            var e = Enumerable.Range(0, length).Cache();
+            var enumerator = e.GetEnumerator();
+
+            while (enumerator.MoveNext()) { }
+
+            Assert.Throws<InvalidOperationException>(() => { var x = enumerator.Current; });
         }
     }
 }
