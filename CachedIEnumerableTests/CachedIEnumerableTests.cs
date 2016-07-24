@@ -190,6 +190,7 @@ namespace CachedIEnumerableTests
             Assert.Equal(length, evaluateCount);
         }
 
+        #region IList Tests
         [Fact]
         public void SettingIndexerThrowsNotSupportedException()
         {
@@ -538,7 +539,7 @@ namespace CachedIEnumerableTests
 
             Assert.Equal(5, result);
         }
-        
+
         [Fact]
         public void IndexerEnumeratesValuesOnlyOnce()
         {
@@ -616,5 +617,6 @@ namespace CachedIEnumerableTests
 
             Assert.Equal(length, evaluateCount);
         }
+        #endregion
     }
 }

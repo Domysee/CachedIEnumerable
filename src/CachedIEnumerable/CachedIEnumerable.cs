@@ -5,23 +5,27 @@ using System.Linq;
 
 namespace CachedIEnumerable
 {
-    public class CachedIEnumerable<T> : IEnumerable<T>, IDisposable, IList<T>
+    public class CachedIEnumerable<T> : IEnumerable<T>, IList<T>
     {
-        private List<T> enumeratedValues;
-        private IEnumerable<T> enumerable;
+        private List<T> cache;
+        private IEnumerable<T> source;
         private IEnumerator<T> enumerator;
-        private bool fullyEnumerated = false;
 
-        public CachedIEnumerable(IEnumerable<T> enumerable)
+        public CachedIEnumerable(IEnumerable<T> source)
         {
-            this.enumeratedValues = new List<T>();
-            this.enumerable = enumerable;
-            this.enumerator = enumerable.GetEnumerator();
+            this.cache = new List<T>();
+            this.source = source;
+            this.enumerator = source.GetEnumerator();
+        }
+
+        ~CachedIEnumerable()
+        {
+            enumerator.Dispose();
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            return new CachedIEnumerator<T>(enumeratedValues, enumerator, ref fullyEnumerated);
+            return new CachedIEnumerator<T>(cache, enumerator);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -29,21 +33,13 @@ namespace CachedIEnumerable
             return GetEnumerator();
         }
 
-        public void Dispose()
-        {
-            (enumerable as IDisposable)?.Dispose();
-        }
-
         #region IList
         public int Count
         {
             get
             {
-                if (fullyEnumerated)
-                    return enumeratedValues.Count;
-
-                if (enumerable is ICollection<T>)
-                    return ((ICollection<T>)enumerable).Count;
+                if (source is ICollection<T>)
+                    return ((ICollection<T>)source).Count;
 
                 var count = 0;
                 var enumerator = this.GetEnumerator();
@@ -59,8 +55,8 @@ namespace CachedIEnumerable
             {
                 if (index < 0) throw new ArgumentOutOfRangeException("The given index is lower than 0");
 
-                if (index < enumeratedValues.Count)
-                    return enumeratedValues[index];
+                if (index < cache.Count)
+                    return cache[index];
 
                 var enumerator = this.GetEnumerator();
                 for (var i = 0; i <= index; i++)
