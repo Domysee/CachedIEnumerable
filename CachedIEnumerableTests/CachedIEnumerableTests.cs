@@ -190,6 +190,31 @@ namespace CachedIEnumerableTests
             Assert.Equal(length, evaluateCount);
         }
 
+        [Fact]
+        public void InvalidatingSourceEnumeratorInvalidatesEnumerator()
+        {
+            var length = 10;
+            var list = Enumerable.Range(0, length).ToList();
+            var e = list.Cache();
+
+            list.Add(10);
+
+            Assert.Throws<InvalidOperationException>(() => { e.ElementAt(5); });
+        }
+
+        [Fact]
+        public void InvalidatingSourceEnumeratorInvalidatesEnumerator_AfterFullEnumeration()
+        {
+            var length = 10;
+            var list = Enumerable.Range(0, length).ToList();
+            var e = list.Cache();
+
+            e.Last();
+            list.Add(10);
+
+            Assert.Throws<InvalidOperationException>(() => { e.ElementAt(5); });
+        }
+
         #region IList Tests
         [Fact]
         public void SettingIndexerThrowsNotSupportedException()
