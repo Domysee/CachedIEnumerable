@@ -231,6 +231,23 @@ namespace CachedIEnumerableTests
         }
 
         [Fact]
+        public void InvalidatingSourceEnumeratorInvalidatesAllEnumerators_EvenIfItsNotNecessaryToAdvance()
+        {
+            var length = 10;
+            var list = Enumerable.Range(0, length).ToList();
+            var e = list.Cache();
+
+            var enumerator1 = e.GetEnumerator();
+            var enumerator2 = e.GetEnumerator();
+            enumerator1.MoveNext();
+            enumerator1.MoveNext();
+            list.Add(10);
+
+            Assert.Throws<InvalidOperationException>(() => { enumerator1.MoveNext(); });
+            Assert.Throws<InvalidOperationException>(() => { enumerator2.MoveNext(); });
+        }
+
+        [Fact]
         public void InvalidatingSourceEnumeratorInvalidatesAllEnumerators_AfterFullEnumeration()
         {
             var length = 10;

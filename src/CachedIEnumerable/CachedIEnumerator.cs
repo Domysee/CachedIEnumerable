@@ -10,11 +10,15 @@ namespace CachedIEnumerable
         private List<T> sharedCache;
         private IEnumerator<T> enumerator;
         private int currentIndex = -1;
+        private bool valid = true;
 
-        public CachedIEnumerator(List<T> sharedCache, IEnumerator<T> enumerator)
+        private Action invalidateAll;
+
+        public CachedIEnumerator(List<T> sharedCache, IEnumerator<T> enumerator, Action invalidateAll)
         {
             this.sharedCache = sharedCache;
             this.enumerator = enumerator;
+            this.invalidateAll = invalidateAll;
         }
 
         public T Current { get; set; }
@@ -28,8 +32,16 @@ namespace CachedIEnumerable
         {
         }
 
+        public void Invalidate()
+        {
+            valid = false;
+        }
+
         public bool MoveNext()
         {
+            if (!valid)
+                throw new InvalidOperationException("The collection was modified after the enumerator was created.");
+
             currentIndex++;
             if (currentIndex < sharedCache.Count)
             {
@@ -37,17 +49,25 @@ namespace CachedIEnumerable
                 return true;
             }
 
-            var success = enumerator.MoveNext();
-            if (success)
+            try
             {
-                Current = enumerator.Current;
-                sharedCache.Add(Current);
-                return true;
+                var success = enumerator.MoveNext();
+                if (success)
+                {
+                    Current = enumerator.Current;
+                    sharedCache.Add(Current);
+                    return true;
+                }
+                else
+                {
+                    Current = default(T);
+                    return false;
+                }
             }
-            else
+            catch (InvalidOperationException)
             {
-                Current = default(T);
-                return false;
+                invalidateAll();
+                throw;
             }
         }
 
