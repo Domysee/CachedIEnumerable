@@ -7,13 +7,13 @@ namespace CachedIEnumerable
 {
     public class CachedIEnumerator<T> : IEnumerator<T>
     {
-        private List<T> sharedEnumeratedValues;
+        private List<T> sharedCache;
         private IEnumerator<T> enumerator;
         private int currentIndex = -1;
 
-        public CachedIEnumerator(List<T> sharedEnumeratedValues, IEnumerator<T> enumerator)
+        public CachedIEnumerator(List<T> sharedCache, IEnumerator<T> enumerator)
         {
-            this.sharedEnumeratedValues = sharedEnumeratedValues;
+            this.sharedCache = sharedCache;
             this.enumerator = enumerator;
         }
 
@@ -31,9 +31,9 @@ namespace CachedIEnumerable
         public bool MoveNext()
         {
             currentIndex++;
-            if (currentIndex < sharedEnumeratedValues.Count)
+            if (currentIndex < sharedCache.Count)
             {
-                Current = sharedEnumeratedValues[currentIndex];
+                Current = sharedCache[currentIndex];
                 return true;
             }
 
@@ -41,7 +41,7 @@ namespace CachedIEnumerable
             if (success)
             {
                 Current = enumerator.Current;
-                sharedEnumeratedValues.Add(Current);
+                sharedCache.Add(Current);
                 return true;
             }
             else
