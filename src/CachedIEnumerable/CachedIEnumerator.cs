@@ -10,13 +10,11 @@ namespace CachedIEnumerable
         private List<T> sharedEnumeratedValues;
         private IEnumerator<T> enumerator;
         private int currentIndex = -1;
-        private bool fullyEnumerated;
 
-        public CachedIEnumerator(List<T> sharedEnumeratedValues, IEnumerator<T> enumerator, ref bool fullyEnumerated)
+        public CachedIEnumerator(List<T> sharedEnumeratedValues, IEnumerator<T> enumerator)
         {
             this.sharedEnumeratedValues = sharedEnumeratedValues;
             this.enumerator = enumerator;
-            this.fullyEnumerated = fullyEnumerated;
         }
 
         public T Current { get; set; }
@@ -48,7 +46,6 @@ namespace CachedIEnumerable
             }
             else
             {
-                fullyEnumerated = true;
                 Current = default(T);
                 return false;
             }
