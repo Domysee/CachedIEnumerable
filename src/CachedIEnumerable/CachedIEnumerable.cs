@@ -12,6 +12,8 @@ namespace CachedIEnumerable
         private IEnumerator<T> enumerator;
         private List<WeakReference<CachedIEnumerator<T>>> enumerators;
 
+        public IReadOnlyCollection<T> CachedValues => cache;
+
         public CachedIEnumerable(IEnumerable<T> source)
         {
             this.cache = new List<T>();
