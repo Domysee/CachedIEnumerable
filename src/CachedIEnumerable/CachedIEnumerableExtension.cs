@@ -7,7 +7,7 @@ namespace CachedIEnumerable
 {
     public static class CachedIEnumerableExtension
     {
-        public static IEnumerable<T> Cache<T>(this IEnumerable<T> enumerable)
+        public static CachedIEnumerable<T> Cache<T>(this IEnumerable<T> enumerable)
         {
             return new CachedIEnumerable<T>(enumerable);
         }

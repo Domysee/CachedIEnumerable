@@ -203,20 +203,6 @@ namespace CachedIEnumerableTests
         }
 
         [Fact]
-        public void InvalidatingSourceEnumeratorInvalidatesEnumerator_AfterFullEnumeration()
-        {
-            var length = 10;
-            var list = Enumerable.Range(0, length).ToList();
-            var e = list.Cache();
-
-            e.Last();
-            var enumerator = e.GetEnumerator();
-            list.Add(10);
-
-            Assert.Throws<InvalidOperationException>(() => { enumerator.MoveNext(); });
-        }
-
-        [Fact]
         public void InvalidatingSourceEnumeratorInvalidatesAllEnumerators()
         {
             var length = 10;
@@ -232,23 +218,7 @@ namespace CachedIEnumerableTests
         }
 
         [Fact]
-        public void InvalidatingSourceEnumeratorInvalidatesEnumerator_EvenIfItsNotNecessaryToAdvance()
-        {
-            var length = 10;
-            var list = Enumerable.Range(0, length).ToList();
-            var e = list.Cache();
-
-            var enumerator1 = e.GetEnumerator();
-            var enumerator2 = e.GetEnumerator();
-            enumerator1.MoveNext();
-            enumerator1.MoveNext();
-            list.Add(10);
-            
-            Assert.Throws<InvalidOperationException>(() => { enumerator2.MoveNext(); });
-        }
-
-        [Fact]
-        public void InvalidatingSourceEnumeratorInvalidatesAllEnumerators_AfterFullEnumeration()
+        public void InvalidatingSourceEnumerator_AfterFullEnumeration_DoesntInvalidateEnumerators()
         {
             var length = 10;
             var list = Enumerable.Range(0, length).ToList();
@@ -259,8 +229,8 @@ namespace CachedIEnumerableTests
             var enumerator2 = e.GetEnumerator();
             list.Add(10);
 
-            Assert.Throws<InvalidOperationException>(() => { enumerator1.MoveNext(); });
-            Assert.Throws<InvalidOperationException>(() => { enumerator2.MoveNext(); });
+            enumerator1.MoveNext();
+            enumerator2.MoveNext();
         }
 
         [Fact]
